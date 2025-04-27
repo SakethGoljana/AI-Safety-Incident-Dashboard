@@ -1,0 +1,423 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+    <meta charset="UTF-8">
+    
+    <link rel="icon" href="favicon-svg.svg" type="image/svg+xml">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Safety Incident Dashboard</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/gridster.js/0.5.6/jquery.gridster.min.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inconsolata:wght@200..900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+   
+
+</head>
+<body>
+    <header>
+        <div class="header-content">
+            <div class="logo-container">
+                <div class="logo-wrapper">
+                    <img src="favicon-svg.svg" class="logo" alt="AI Safety Logo" width="100" height="100" aria-label="AI Safety Logo">
+                </div>
+                <h1>AI Safety Incident Dashboard</h1>
+            </div>
+            <div class="header-controls">
+                <button id="theme-toggle" class="theme-toggle" aria-label="Toggle between light and dark theme">
+                    <svg class="sun-icon" viewBox="0 0 24 24" width="24" height="24">
+                        <circle cx="12" cy="12" r="5"></circle>
+                        <line x1="12" y1="1" x2="12" y2="3"></line>
+                        <line x1="12" y1="21" x2="12" y2="23"></line>
+                        <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+                        <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+                        <line x1="1" y1="12" x2="3" y2="12"></line>
+                        <line x1="21" y1="12" x2="23" y2="12"></line>
+                        <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+                        <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+                    </svg>
+                    <svg class="moon-icon" viewBox="0 0 24 24" width="24" height="24">
+                        <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+                    </svg>
+                </button>
+                
+                <div class="notification-bell">
+                    <button id="notification-btn" aria-label="View notifications">
+                        <svg class="bell-icon" viewBox="0 0 24 24" width="24" height="24">
+                            <path d="M12 22c1.1 0 2-.9 2-2h-4c0 1.1.9 2 2 2zm6-6v-5c0-3.07-1.63-5.64-4.5-6.32V4c0-.83-.67-1.5-1.5-1.5s-1.5.67-1.5 1.5v.68C7.64 5.36 6 7.92 6 11v5l-2 2v1h16v-1l-2-2z"></path>
+                        </svg>
+                        <span id="notification-badge" class="notification-badge hidden">0</span>
+                    </button>
+                        
+                </div>
+                <p class="tagline">Real-Time AI Safety Monitoring</p>
+            </div>
+        </div>
+    </header>
+
+    <section class="filter-bar">
+        <div class="filter-group">
+            <label for="severity-filter">Filter by Severity:</label>
+            <select id="severity-filter" aria-label="Filter incidents by severity">
+                <option value="All">All Severities</option>
+                <option value="Low">Low</option>
+                <option value="Medium">Medium</option>
+                <option value="High">High</option>
+            </select>
+        </div>
+        <div class="filter-group">
+            <label for="category-filter">Filter by Category:</label>
+            <select id="category-filter" aria-label="Filter incidents by category">
+                <option value="All">All Categories</option>
+                <option value="Bias">Bias</option>
+                <option value="Hallucination">Hallucination</option>
+                <option value="Data Leak">Data Leak</option>
+                <option value="Overconfidence">Overconfidence</option>
+                <option value="Misclassification">Misclassification</option>
+            </select>
+        </div>
+        <div class="filter-group">
+            <label for="status-filter">Filter by Status:</label>
+            <select id="status-filter" aria-label="Filter incidents by status">
+                <option value="All">All Statuses</option>
+                <option value="Open">Open</option>
+                <option value="In Progress">In Progress</option>
+                <option value="Resolved">Resolved</option>
+            </select>
+        </div>
+        <div class="filter-group">
+            <label for="sort-by">Sort by:</label>
+            <select id="sort-by" aria-label="Sort incidents">
+                <option value="newest">Newest First</option>
+                <option value="oldest">Oldest First</option>
+            </select>
+        </div>
+        <div class="filter-group">
+            <label for="search-input">Search:</label>
+            <input type="text" id="search-input" placeholder="Search by title or #tag..." aria-label="Search incidents by title or tags" autocomplete="off">
+            <div class="autocomplete-dropdown hidden" id="autocomplete-dropdown"></div>
+        </div>
+        <div class="filter-group">
+            <label>Date Range:</label>
+            <div class="date-picker-container">
+                <input type="date" id="start-date" placeholder="Start Date" aria-label="Select start date">
+                <span class="date-separator">–</span>
+                <input type="date" id="end-date" placeholder="End Date" aria-label="Select end date">
+                <button class="clear-dates-btn" aria-label="Clear date filters">Clear</button>
+            </div>
+        </div>
+        <button id="add-incident-btn" class="primary-btn" aria-label="Add new incident">Add New Incident</button>
+        <button id="export-btn" class="export-btn" aria-label="Export incident data">Export Data</button>
+        <button id="feedback-btn" class="feedback-btn" aria-label="Provide feedback">Feedback</button>
+        
+                    <div class="notification-dropdown hidden" id="notification-dropdown">
+                        <h3 style="padding: 20px;">Notifications</h3>
+                        <ul id="notification-list"></ul>
+                    </div>
+    </section>
+
+    <section class="metrics-panel">
+        <div class="metric-card">
+            <h3>Total Incidents</h3>
+            <p id="total-count">15</p>
+            <div class="progress-bar"><div class="progress-bar-fill" id="total-progress"></div></div>
+        </div>
+        <div class="metric-card">
+            <h3>High Severity</h3>
+            <p id="high-count" style="color: #dc2626;">5</p>
+            <div class="progress-bar"><div class="progress-bar-fill high" id="high-progress"></div></div>
+        </div>
+        <div class="metric-card">
+            <h3>Medium Severity</h3>
+            <p id="medium-count" style="color: #ea580c;">6</p>
+            <div class="progress-bar"><div class="progress-bar-fill medium" id="medium-progress"></div></div>
+        </div>
+        <div class="metric-card">
+            <h3>Low Severity</h3>
+            <p id="low-count" style="color: #059669;">4</p>
+            <div class="progress-bar"><div class="progress-bar-fill low" id="low-progress"></div></div>
+        </div>
+    </section>
+
+    <section class="ai-insights-panel">
+        <h2 class="section-title">AI-Powered Insights</h2>
+        <div class="insights-container">
+            <div class="insight-card">
+                <h3>Trend Analysis</h3>
+                <p id="trend-insight">No significant trends detected.</p>
+            </div>
+            <div class="insight-card">
+                <h3>Predictive Alert</h3>
+                <p id="predictive-insight">No predictive alerts at this time.</p>
+            </div>
+            <div class="insight-card">
+                <h3>Anomaly Detection</h3>
+                <p id="anomaly-insight">No anomalies detected.</p>
+            </div>
+        </div>
+    </section>
+
+    <main>
+        <section class="charts-container gridster">
+            <div class="chart-card" data-id="severity-chart">
+                <h3>Incidents by Severity</h3>
+                <div class="chart-container" style="height: 300px;">
+                    <canvas id="severityChart"></canvas>
+                </div>
+            </div>
+            <div class="chart-card" data-id="timeline-chart">
+                <h3>Incidents Over Time</h3>
+                <div class="chart-container" style="height: 300px;">
+                    <canvas id="timelineChart"></canvas>
+                </div>
+            </div>
+            <button id="see-more-charts" class="primary-btn" style="grid-column: 1 / -1; margin: 1.5rem auto; width: 200px;">See More Charts</button>
+            <!-- <button id="customize-dashboard" class="primary-btn" style="grid-column: 1 / -1; margin: 1.5rem auto; width: 200px;">Customize Dashboard</button> -->
+        </section>
+
+        <h2 class="section-title">Incident Reports</h2>
+        <div class="view-toggle">
+            <button id="grid-view-btn" class="primary-btn active" aria-label="Switch to grid view">Grid View</button>
+            <button id="timeline-view-btn" class="primary-btn" aria-label="Switch to timeline view">Timeline View</button>
+        </div>
+        <section class="incidents-container" id="incidents-list">
+            <div id="empty-state" class="hidden">
+                <div class="empty-state-content">
+                    <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <circle cx="12" cy="12" r="10"></circle>
+                        <line x1="12" y1="8" x2="12" y2="12"></line>
+                        <line x1="12" y1="16" x2="12.01" y2="16"></line>
+                    </svg>
+                    <p>No incidents found. Adjust filters or add a new incident.</p>
+                </div>
+            </div>
+            <div id="loading-state" class="loading-container hidden">
+                <div class="loader"></div>
+                <p class="loading-text">Loading incidents...</p>
+            </div>
+        </section>
+        <div class="pagination" id="pagination-controls"></div>
+    </main>
+
+    <div id="incident-modal" class="modal">
+        <div class="modal-backdrop"></div>
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Report New Incident</h2>
+                <button class="close-btn" aria-label="Close modal">×</button>
+            </div>
+            <form id="incident-form">
+                <div class="form-group">
+                    <label for="incident-title">Title:</label>
+                    <input type="text" id="incident-title" required maxlength="100" aria-required="true">
+                    <div class="error-message" id="title-error"></div>
+                </div>
+                <div class="form-group">
+                    <label for="incident-description">Description:</label>
+                    <textarea id="incident-description" required minlength="50" aria-required="true"></textarea>
+                    <div class="error-message" id="description-error"></div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="incident-severity">Severity:</label>
+                        <select id="incident-severity" required aria-required="true">
+                            <option value="">Select Severity</option>
+                            <option value="Low">Low</option>
+                            <option value="Medium">Medium</option>
+                            <option value="High">High</option>
+                        </select>
+                        <div class="error-message" id="severity-error"></div>
+                    </div>
+                    <div class="form-group">
+                        <label for="incident-category">Category:</label>
+                        <select id="incident-category" required aria-required="true">
+                            <option value="">Select Category</option>
+                            <option value="Bias">Bias</option>
+                            <option value="Hallucination">Hallucination</option>
+                            <option value="Data Leak">Data Leak</option>
+                            <option value="Overconfidence">Overconfidence</option>
+                            <option value="Misclassification">Misclassification</option>
+                        </select>
+                        <div class="error-message" id="category-error"></div>
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="incident-status">Status:</label>
+                        <select id="incident-status" required aria-required="true">
+                            <option value="">Select Status</option>
+                            <option value="Open">Open</option>
+                            <option value="In Progress">In Progress</option>
+                            <option value="Resolved">Resolved</option>
+                        </select>
+                        <div class="error-message" id="status-error"></div>
+                    </div>
+                    <div class="form-group">
+                        <label for="conversation-id">Conversation ID (optional):</label>
+                        <input type="text" id="conversation-id" placeholder="e.g., conv_123456789">
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="incident-tags">Tags (optional):</label>
+                    <input type="text" id="incident-tags" placeholder="e.g., #urgent #bias">
+                </div>
+                <button type="submit" class="primary-btn" aria-label="Submit incident report">Report Incident</button>
+            </form>
+        </div>
+    </div>
+
+    <div id="details-modal" class="modal">
+        <div class="modal-backdrop"></div>
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Incident Details</h2>
+                <button class="close-btn" aria-label="Close modal">×</button>
+            </div>
+            <div id="details-content" class="modal-body">
+                <h3 id="details-title"></h3>
+                <p id="details-description"></p>
+                <div class="details-meta">
+                    <span id="details-severity"></span>
+                    <span id="details-category"></span>
+                    <div class="form-group status-group">
+                        <label for="details-status">Status:</label>
+                        <select id="details-status" onchange="updateStatusFromModal(this)" aria-label="Update incident status">
+                            <option value="Open">Open</option>
+                            <option value="In Progress">In Progress</option>
+                            <option value="Resolved">Resolved</option>
+                        </select>
+                    </div>
+                    <span id="details-date"></span>
+                    <span id="details-conversation"></span>
+                    <span id="details-tags"></span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="charts-modal" class="modal">
+        <div class="modal-backdrop"></div>
+        <div class="modal-content" style="max-width: 1000px; width: 95%; max-height: 90vh; overflow-y: auto;">
+            <div class="modal-header">
+                <h2>All Analytics Charts</h2>
+                <button class="close-btn" aria-label="Close modal">×</button>
+            </div>
+            <div class="charts-container" style="grid-template-columns: repeat(auto-fit, minmax(400px, 1fr)); gap: 1.5rem;">
+                <div class="chart-card">
+                    <h3>Incidents by Severity</h3>
+                    <div class="chart-container" style="height: 250px;">
+                        <canvas id="modal-severity-chart"></canvas>
+                    </div>
+                </div>
+                <div class="chart-card">
+                    <h3>Incidents Over Time</h3>
+                    <div class="chart-container" style="height: 250px;">
+                        <canvas id="modal-timeline-chart"></canvas>
+                    </div>
+                </div>
+                <div class="chart-card">
+                    <h3>Incidents by Category</h3>
+                    <div class="chart-container" style="height: 250px;">
+                        <canvas id="modal-category-chart"></canvas>
+                    </div>
+                </div>
+                <div class="chart-card">
+                    <h3>Incident Status Distribution</h3>
+                    <div class="chart-container" style="height: 250px;">
+                        <canvas id="modal-status-chart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="export-modal" class="modal">
+        <div class="modal-backdrop"></div>
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Export Data</h2>
+                <button class="close-btn" aria-label="Close modal">×</button>
+            </div>
+            <form id="export-form">
+                <div class="form-group">
+                    <label for="export-format">Export Format:</label>
+                    <select id="export-format" required aria-required="true">
+                        <option value="csv">CSV</option>
+                        <option value="json">JSON</option>
+                        <option value="pdf">PDF</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Select Fields:</label>
+                    <div class="checkbox-group">
+                        <label><input type="checkbox" checked value="title"> Title</label>
+                        <label><input type="checkbox" checked value="description"> Description</label>
+                        <label><input type="checkbox" checked value="severity"> Severity</label>
+                        <label><input type="checkbox" checked value="category"> Category</label>
+                        <label><input type="checkbox" checked value="status"> Status</label>
+                        <label><input type="checkbox" checked value="date"> Date</label>
+                        <label><input type="checkbox" value="conversation_id"> Conversation ID</label>
+                        <label><input type="checkbox" value="tags"> Tags</label>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="export-preview">Preview:</label>
+                    <textarea id="export-preview" readonly></textarea>
+                </div>
+                <button type="submit" class="primary-btn" aria-label="Export data">Export</button>
+            </form>
+        </div>
+    </div>
+
+    <div id="feedback-modal" class="modal">
+        <div class="modal-backdrop"></div>
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Provide Feedback</h2>
+                <button class="close-btn" aria-label="Close modal">×</button>
+            </div>
+            <form id="feedback-form">
+                <div class="form-group">
+                    <label for="feedback-type">Feedback Type:</label>
+                    <select id="feedback-type" required aria-required="true">
+                        <option value="">Select Type</option>
+                        <option value="bug">Bug Report</option>
+                        <option value="feature">Feature Request</option>
+                        <option value="general">General Feedback</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="feedback-message">Message:</label>
+                    <textarea id="feedback-message" required minlength="20" aria-required="true"></textarea>
+                </div>
+                <button type="submit" class="primary-btn" aria-label="Submit feedback">Submit Feedback</button>
+            </form>
+        </div>
+    </div>
+
+    <div id="toast" class="toast">
+        <div class="toast-content">
+            <svg class="check-icon" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <polyline points="20 6 9 17 4 12"></polyline>
+            </svg>
+            <span id="toast-message">Incident reported successfully!</span>
+        </div>
+    </div>
+
+    <footer>
+        <p>Built for AI Safety | <span id="current-year"></span></p>
+    </footer>
+
+    <!-- jQuery FIRST -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+
+<!-- Gridster SECOND -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gridster.js/0.5.6/jquery.gridster.min.js"></script>
+
+<!-- Your script.js LAST -->
+<script src="script.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</body>
+</html>
