@@ -1668,8 +1668,8 @@ function showToast(message) {
 
 // Toggle theme
 function toggleTheme() {
-    const currentTheme = document.documentElement.getAttribute('data-theme') || 'dark';
-    const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+    const currentTheme = document.documentElement.getAttribute('data-theme') || 'light';
+    const newTheme = currentTheme === 'light' ? 'dark' : 'light';
     
     document.documentElement.classList.add('theme-transition');
     document.documentElement.setAttribute('data-theme', newTheme);
