@@ -2,6 +2,11 @@
 
 Welcome to the **AI Safety Incident Dashboard**, a cutting-edge, visually stunning, and highly interactive web application designed to revolutionize how organizations monitor, analyze, and manage AI-related safety incidents. Built with a focus on accessibility, performance, and user customization, this dashboard empowers AI developers, safety researchers, and compliance teams to track incidents, uncover insights, and drive safer AI deployments. With a sleek, modern interface inspired by the refined `style.css`, this tool combines elegance with functionality to deliver an unparalleled user experience.
 
+## Live Demo
+
+You can check out the live version of this project at: [Dashboard]([https://your-deployed-link.com](https://sakethgoljana.github.io/AI-Safety-Incident-Dashboard/))
+
+
 ---
 
 ## 🌟 Why Choose the AI Safety Incident Dashboard?
