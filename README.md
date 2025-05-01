@@ -4,7 +4,7 @@ Welcome to the **AI Safety Incident Dashboard**, a cutting-edge, visually stunni
 
 ## Live Demo
 
-You can check out the live version of this project at: [Dashboard]([https://your-deployed-link.com](https://sakethgoljana.github.io/AI-Safety-Incident-Dashboard/))
+You can check out the live version of this project at: [Dashboard]([https://your-deployed-link.com](https://sakethgoljana.github.io/AI-Safety-Incident-Dashboard/)
 
 
 ---
